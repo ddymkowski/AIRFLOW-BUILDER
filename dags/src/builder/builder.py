@@ -5,7 +5,7 @@ from pydantic.error_wrappers import ValidationError
 
 from builder.exceptions import (DagConfigValidationException,
                                 DagTaskConfigMissmatchException,
-                                PipelineYmlParserException)
+                                YmlConfigException)
 from builder.schemas import DAGConfig
 from utils import read_yml
 
@@ -18,7 +18,7 @@ class DagBuilderConfig:
         self._validate_dag_instances()
 
     @property
-    def dag_instances(self) -> ...:
+    def dag_instances(self) -> Dict[str, DAGConfig]:
         return self._dag_instances
 
     @property
@@ -27,27 +27,20 @@ class DagBuilderConfig:
 
     def _load_dag_instances(self) -> Dict[str, str]:
         """
-        Loads dags configuration file from dags/src/configs/dags.
-
-        {
-            "first_dag_name: {options},
-            ...
-         }
+        Loads dags configuration file from dags/src/configs/dags and parses it into pydantic dataclass.
         """
         try:
             raw_cfg = read_yml(self._dag_instances_cfg_path)["dag_instances"]["options"]
-        except PipelineYmlParserException:
-            raise
-        except KeyError:
-            raise PipelineYmlParserException(
-                f'Given file {self._dag_instances_cfg_path} is missing two one or both keys: "dag_instances", "options"'
-            )
-
-        try:
             return {
                 cfg_name: DAGConfig(name=cfg_name, **cfg)
                 for cfg_name, cfg in raw_cfg.items()
             }
+
+        except KeyError:
+            raise YmlConfigException(
+                f'Given file {self._dag_instances_cfg_path} is missing one or both keys: "dag_instances", "options"'
+            )
+
         except ValidationError as e:
             errors = "\n".join(
                 [f"{error['loc']} -> {error['msg']}" for error in e.errors()]
@@ -58,7 +51,7 @@ class DagBuilderConfig:
 
     def _validate_dag_instances(self) -> None:
         """
-        Validates whether for each entry in dags configuration there is tasks configuration file in dags/src/configs/tasks with name of dag_instance.
+        Validates whether for each entry in dag instance configurations there is tasks configuration in dags/src/configs/tasks with name of dag_instance.
         """
         task_files = [
             file.stem

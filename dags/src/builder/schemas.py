@@ -10,3 +10,7 @@ class DAGConfig(BaseModel):
     start_date: str
     end_date: str
     timezone: Optional[str] = "UTC"
+
+
+class BaseTask(BaseModel):
+    name: str

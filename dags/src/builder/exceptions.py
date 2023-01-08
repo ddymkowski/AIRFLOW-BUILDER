@@ -1,5 +1,5 @@
-class PipelineYmlParserException(Exception):
-    """Handles incorrectly formatted pipeline yml files"""
+class YmlConfigException(Exception):
+    """Handles incorrectly formatted config yml files"""
 
 
 class DagTaskConfigMissmatchException(Exception):
