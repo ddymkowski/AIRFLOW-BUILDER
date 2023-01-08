@@ -1,0 +1,17 @@
+
+dag_instances:
+  options:
+  
+    first_pipeline:
+      description: first_pipeline description
+      schedule: "0 1 * * *"
+      start_date: "2020-01-01"
+      end_date: "2030-12-31"
+      timezone: "Europe/Warsaw"
+
+    second_pipeline:
+      description: second_pipeline description
+      schedule: "0 2 * * *"
+      start_date: "2020-01-01"
+      end_date: "2030-12-31"
+      timezone: "Europe/Warsaw"
