@@ -3,3 +3,6 @@ build-dev:
 
 up-dev:
 	docker-compose up -d
+
+format:
+	black . && isort

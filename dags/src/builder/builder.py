@@ -1,29 +1,18 @@
-import os
 from pathlib import Path
 from typing import Dict
 
-import yaml
+from pydantic.error_wrappers import ValidationError
 
-from builder.exceptions import (DagTaskConfigMissmatchException,
+from builder.exceptions import (DagConfigValidationException,
+                                DagTaskConfigMissmatchException,
                                 PipelineYmlParserException)
-
-
-def read_yml(yml_path: str) -> Dict[str, str]:
-    try:
-        with open(yml_path) as yaml_file:
-            yml = yaml.load(yaml_file, Loader=yaml.Loader)
-        return yml
-
-    except (yaml.parser.ParserError, yaml.scanner.ScannerError):
-        raise PipelineYmlParserException(
-            f"{yml_path} is incorrectly formatted yml file."
-        )
+from builder.schemas import DAGConfig
+from utils import read_yml
 
 
 class DagBuilderConfig:
     def __init__(self, dag_instances_cfg_path: str) -> None:
         self._dag_instances_cfg_path = Path(dag_instances_cfg_path)
-
         self._dag_instances = self._load_dag_instances()
 
         self._validate_dag_instances()
@@ -31,6 +20,10 @@ class DagBuilderConfig:
     @property
     def dag_instances(self) -> ...:
         return self._dag_instances
+
+    @property
+    def dags_count(self) -> int:
+        return len(self._dag_instances.keys())
 
     def _load_dag_instances(self) -> Dict[str, str]:
         """
@@ -41,7 +34,27 @@ class DagBuilderConfig:
             ...
          }
         """
-        return read_yml(self._dag_instances_cfg_path)["dag_instances"]["options"]
+        try:
+            raw_cfg = read_yml(self._dag_instances_cfg_path)["dag_instances"]["options"]
+        except PipelineYmlParserException:
+            raise
+        except KeyError:
+            raise PipelineYmlParserException(
+                f'Given file {self._dag_instances_cfg_path} is missing two one or both keys: "dag_instances", "options"'
+            )
+
+        try:
+            return {
+                cfg_name: DAGConfig(name=cfg_name, **cfg)
+                for cfg_name, cfg in raw_cfg.items()
+            }
+        except ValidationError as e:
+            errors = "\n".join(
+                [f"{error['loc']} -> {error['msg']}" for error in e.errors()]
+            )
+            raise DagConfigValidationException(
+                f"Invalid data type in dag instances config:\n{errors}"
+            )
 
     def _validate_dag_instances(self) -> None:
         """
