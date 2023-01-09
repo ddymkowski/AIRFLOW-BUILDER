@@ -1,0 +1,22 @@
+pipeline_name: first_pipeline
+description: Daily ingestion of xyz api through gcs to bigquery
+tasks:
+  external_to_object_storage:
+    type: api
+    cloud: gcp
+    project_id: abc
+    bucket_name: xyz
+
+  object_storage_to_dwh:
+    source_cloud: gcp
+      source_project: zbc
+      source_bucket: xyz
+
+    dwh_name: BigQuery
+      target_dataset: target
+      target_table: table
+        method: method
+
+  dwh_transformations:
+    tool: dbt
+    tags: upsert_xyz_api
