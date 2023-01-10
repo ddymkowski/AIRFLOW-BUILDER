@@ -3,11 +3,9 @@ from typing import Dict
 
 from pydantic.error_wrappers import ValidationError
 
-from builder.exceptions import (
-    DagConfigValidationException,
-    DagTaskConfigMissmatchException,
-    YmlConfigException,
-)
+from builder.exceptions import (DagConfigValidationException,
+                                DagTaskConfigMissmatchException,
+                                YmlConfigException)
 from builder.schemas import DAGConfig
 from utils import read_yml
 

@@ -5,6 +5,7 @@ PATH = (
 from pprint import pprint
 
 from builder.builder import DagBuilder, DagBuilderConfig
+from builder.datalake_ingestors.api_collector import BinanceApiExampleCollector
 from builder.enums import CloudProvider
 
 cfg = DagBuilderConfig(PATH)
@@ -12,9 +13,8 @@ cfg = DagBuilderConfig(PATH)
 # pprint(cfg.dag_instances)
 
 
-from builder.datalake_ingestors.api_collector import BinanceApiExampleCollector
 
 
 c = BinanceApiExampleCollector("https://api2.binance.com/")
 
-print(c.gather_all_data("api/v3/ticker/24hr",None, None))
+print(c.gather_all_data("api/v3/ticker/24hr", None, None))
