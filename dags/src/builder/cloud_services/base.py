@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
 
 
-class BaseCloudService(ABC):
+class BaseCloudObjectStorageService(ABC):
     # Object Storage
     @abstractmethod
     def save_from_memory_to_object_storage(self) -> None:
         ...
 
     @abstractmethod
-    def save_from_file_to_object_storage(self) -> None:
+    def save_file_to_object_storage(self) -> None:
         ...
 
     @abstractmethod
@@ -20,7 +20,7 @@ class BaseCloudService(ABC):
         ...
 
     @abstractmethod
-    def move_between_internal_object_storages(self) -> None:
+    def move_to_internal_object_storage(self) -> None:
         ...
 
     @abstractmethod

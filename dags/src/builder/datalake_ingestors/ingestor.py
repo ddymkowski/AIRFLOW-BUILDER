@@ -22,7 +22,7 @@ class DatalalakeIngestor:
             "binance_api": BinanceApiExampleCollector,
         }  # to be moved to some constants file
 
-        return source_class_mapping[self._source_type](**self._storage_details)
+        return source_class_mapping[self._source_type](**self._source_details)
 
     def get_data_dumper(self) -> BaseDatalakeDumper:
         ...
