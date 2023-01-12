@@ -13,8 +13,6 @@ cfg = DagBuilderConfig(PATH)
 # pprint(cfg.dag_instances)
 
 
-
-
 c = BinanceApiExampleCollector("https://api2.binance.com/")
 
 print(c.gather_all_data("api/v3/ticker/24hr", None, None))

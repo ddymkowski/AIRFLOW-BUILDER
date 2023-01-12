@@ -14,19 +14,17 @@ class BaseApiDataCollector(BaseDataCollector):
         base_url: str,
         auth_url: str = None,
         authorization_method: Literal["Bearer", "Credentials"] = None,
-        data_dumper: BaseDatalakeDumper = None,  # In case we want to store data every request somewhere else than ram
     ) -> None:
         self._base_url = base_url
         self._auth_url = auth_url
         self._authorization_method = authorization_method
-        self._data_dumper = data_dumper
 
     @abstractmethod
     def get_token(self) -> Optional[str]:
         ...
 
     @abstractmethod
-    def gather_all_data(self) -> ...:
+    def gather_data_chunk(self) -> ...:
         ...
 
     @abstractmethod
@@ -49,7 +47,7 @@ class BinanceApiExampleCollector(BaseApiDataCollector):
         super().__init__(base_url, auth_url, authorization_method, data_dumper)
 
     @staticmethod
-    def _prepare_session() -> HTTPAdapter:
+    def _prepare_adapter() -> HTTPAdapter:
         retry_strategy = Retry(
             total=3,
             status_forcelist=[500, 401],
@@ -76,10 +74,11 @@ class BinanceApiExampleCollector(BaseApiDataCollector):
         print(response.status_code)
         return
 
-    def gather_all_data(
+    def gather_chunk_data(
         self, endpoint: str, params: Dict[str, Any], headers: Dict[str, Any]
     ) -> ...:
-        adapter = self._prepare_session()
+        adapter = self._prepare_adapter()
+        url = self._base_url + endpoint
 
         with requests.Session() as s:
             if headers:
@@ -87,11 +86,11 @@ class BinanceApiExampleCollector(BaseApiDataCollector):
             s.mount("https://", adapter)
             s.mount("http://", adapter)
 
-            r = self.request_data(s, endpoint, params)
+            r = s.get(url, params)
 
             if r.status_code == 200:
                 data = self._handle_200(r)
                 return data
 
-            else:
-                self._handle_not_200(r)
+            self._handle_not_200(r)
+            return
