@@ -1,5 +1,5 @@
 from typing import Any, Dict, List
-
+from google.cloud import storage
 from .base import BaseCloudObjectStorageService
 
 
@@ -22,15 +22,27 @@ class GCSService(BaseCloudObjectStorageService):
     def region(self) -> str:
         return self._region
 
+    @staticmethod
+    def _get_blob(project_name: str, bucket_name:str, blob_path: str,) -> 'Blob':
+    
+        storage_client = storage.Client(project=project_name)
+        bucket = storage_client.bucket(bucket_name)
+        return bucket.blob(blob_path)
+
     def save_from_memory_to_object_storage(
         self,
         data: bytes,
-        format: str,
         project_name: str,
         bucket_name: str,
+        prefix: str,
+        filename: str,
         **kwargs,
     ) -> None:
-        ...
+
+        gcs_file = bucket_name + prefix + filename
+
+        blob = self._get_blob(project_name, bucket_name, gcs_file)
+        blob.upload_from_string(data)
 
     def save_file_to_object_storage(
         self,
