@@ -1,22 +1,27 @@
 pipeline_name: first_pipeline
 description: Daily ingestion of xyz api through gcs to bigquery
+
+default_vars:
+  source_format: CSV
+  separator: ','
+  encoding: utf8
+
 tasks:
   external_to_object_storage:
     type: api
-    cloud: gcp
+    task_name: ingest_binance_24hr
+    endpoint: api/v3/ticker/24hr
     project_id: abc
     bucket_name: xyz
 
   object_storage_to_dwh:
-    source_cloud: gcp
-      source_project: zbc
-      source_bucket: xyz
+    task_name: update_xyz_table
+    source_project: abc
+    source_bucket: xyz
+    source_objects: weather.csv
+    
+    destination_dataset: weather
+    destination_table: weather_historical
 
-    dwh_name: BigQuery
-      target_dataset: target
-      target_table: table
-        method: method
-
-  dwh_transformations:
-    tool: dbt
-    tags: upsert_xyz_api
+    write_disposition: WRITE_APPEND
+    schema_file: some_path

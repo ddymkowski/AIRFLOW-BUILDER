@@ -40,7 +40,6 @@ class GCSService(BaseCloudObjectStorageService):
     ) -> None:
 
         gcs_file = bucket_name + prefix + filename
-
         blob = self._get_blob(project_name, bucket_name, gcs_file)
         blob.upload_from_string(data)
 

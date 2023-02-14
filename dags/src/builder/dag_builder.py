@@ -3,12 +3,13 @@ from typing import Dict
 
 from pydantic.error_wrappers import ValidationError
 
-from builder.exceptions import (DagConfigValidationException,
+from src.builder.exceptions import (DagConfigValidationException,
                                 DagTaskConfigMissmatchException,
                                 YmlConfigException)
-from builder.schemas import DAGConfig
-from utils import read_yml
-
+from src.builder.schemas import DAGConfig
+from src.utils import read_yml
+from airflow import DAG
+from pprint import pprint
 
 class DagBuilderConfig:
     def __init__(self, dag_instances_cfg_path: str) -> None:
@@ -16,6 +17,9 @@ class DagBuilderConfig:
         self._dag_instances = self._load_dag_instances()
 
         self._validate_dag_instances()
+
+    def __repr__(self) -> str:
+        return '\n\n'.join([f'{key} -> {value}' for key, value in self.dag_instances.items()])
 
     @property
     def dag_instances(self) -> Dict[str, DAGConfig]:
@@ -70,5 +74,18 @@ class DagBuilder:
     def __init__(self, dags_config: DagBuilderConfig) -> None:
         self.dags_config = dags_config
 
-    def create_dag(self) -> ...:
-        ...
+    def create_dags(self):
+        for dag_name, dag_cfg in self.dags_config.dag_instances.items():
+            self._create_dag(dag_name, dag_cfg)
+            break
+
+    def _create_dag(self, dag_name: str, dag_cfg: DAGConfig) -> ...:
+        tasks_details = read_yml(f'dags/src/configs/tasks/{dag_name}.yml')
+        pprint(dag_cfg)
+        print("**"*30)
+        pprint(tasks_details)
+
+        tasks = []
+
+
+

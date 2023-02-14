@@ -4,7 +4,7 @@ PATH = (
 
 from pprint import pprint
 
-from builder.builder import DagBuilder, DagBuilderConfig
+from dags.src.builder.dag_builder import DagBuilder, DagBuilderConfig
 from builder.datalake_ingestors.api_collector import BinanceApiExampleCollector
 from builder.enums import CloudProvider
 
